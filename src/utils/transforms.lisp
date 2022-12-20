@@ -210,6 +210,18 @@
                         (setf (aref hexstr pos)       (aref digits high))
                         (setf (aref hexstr (+ pos 1)) (aref digits low))))
               hexstr))))
+(defun int-to-uuid (uid)
+  (declare (type (or null string) uid))
+  (when uid
+    (let* ( (id (parse-integer uid))
+            (uuid (make-instance 'uuid:uuid
+                          :time-low (ldb (byte 32 0) 0)
+                          :time-mid (ldb (byte 16 32) 0)
+                          :time-high (ldb (byte 16 48) 0)
+                          :clock-seq-var (ash id -56)
+                          :clock-seq-low (logand (ash id -48) #x00FF)
+                          :node (logand id #x0000FFFFFFFFFFFF) )))
+      (princ-to-string uuid))))
 
 (defun int-to-ip (int)
   "Transform an IP as integer into its dotted notation, optimised code from
